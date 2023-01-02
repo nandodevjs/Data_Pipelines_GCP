@@ -1,0 +1,51 @@
+name: 'Terraform CI'
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+      - '**.tf'
+  pull_request:
+
+jobs:
+  terraform:
+    name: 'terraform'
+    runs-on: unbuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+
+    - name: Checkout
+      uses: action/checkout@v2
+
+    - name: Setup terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Terraform Init
+      run: terraform init
+      env:
+        GOOGLE_CREDENTIALS: ${{secretes.GOOGLE_CREDENTIALS }}
+
+    - name: Terraform Plan
+      run: terraform plan -lock=false
+      env:
+        GOOGLE_CREDENTIALS: ${{secretes.GOOGLE_CREDENTIALS }}
+
+
+    - name: Terraform Plan
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve
+      env:
+        GOOGLE_CREDENTIALS: ${{secretes.GOOGLE_CREDENTIALS }}
+
+
+
+
+
+
+
+
