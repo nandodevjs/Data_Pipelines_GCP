@@ -1,18 +1,17 @@
+from fastapi import FastAPI, HTTPException
 from google.cloud import storage
 from pydantic import BaseModel
-from fastapi import FastAPI
 import requests
 import uvicorn
+
 #www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/shpc/dsas/ca/ca-2004-01.csv
 
 app = FastAPI()
-
 
 class Params(BaseModel):
     url: str
     bucket_name: str
     output_file_prefix: str
-
 
 def put_file_to_gcs(output_file: str, bucket_name: str, content):
     try:
@@ -25,17 +24,14 @@ def put_file_to_gcs(output_file: str, bucket_name: str, content):
     except Exception as ex:
         print(ex)
 
-
 @app.get('/')
 async def read_root():
     return {"Hello": "World"}
-
 
 def get_dados(remote_url):
     response = requests.get(remote_url)
 
     return response
-
 
 @app.post("/download_combustivel")
 async def download_combustivel(params: Params):
@@ -50,7 +46,6 @@ async def download_combustivel(params: Params):
         return {"Status": "OK", "Bucket_name": params.bucket_name, "url": params.url}
     except Exception as ex:
         raise HTTPException(status_code=ex.code, detail=f"{ex}")
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
